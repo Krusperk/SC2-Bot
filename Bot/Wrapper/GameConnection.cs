@@ -184,7 +184,7 @@ namespace Bot {
             return response.Query;
         }
 
-        private async Task Run(Bot bot, uint playerId) {
+        private async Task Run(IBot bot, uint playerId) {
             var gameInfoReq = new Request();
             gameInfoReq.GameInfo = new RequestGameInfo();
 
@@ -239,7 +239,7 @@ namespace Bot {
             }
         }
 
-        public async Task RunSinglePlayer(Bot bot, string map, Race myRace, Race opponentRace,
+        public async Task RunSinglePlayer(IBot bot, string map, Race myRace, Race opponentRace,
             Difficulty opponentDifficulty) {
             var port = 5678;
             Logger.Info("Starting SinglePlayer Instance");
@@ -253,14 +253,14 @@ namespace Bot {
             await Run(bot, playerId);
         }
 
-        private async Task RunLadder(Bot bot, Race myRace, int gamePort, int startPort) {
+        private async Task RunLadder(IBot bot, Race myRace, int gamePort, int startPort) {
             await Connect(gamePort);
             var playerId = await JoinGameLadder(myRace, startPort);
             await Run(bot, playerId);
             // await RequestLeaveGame();
         }
 
-        public async Task RunLadder(Bot bot, Race myRace, string[] args) {
+        public async Task RunLadder(IBot bot, Race myRace, string[] args) {
             var commandLineArgs = new CLArgs(args);
             await RunLadder(bot, myRace, commandLineArgs.GamePort, commandLineArgs.StartPort);
         }

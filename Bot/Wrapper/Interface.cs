@@ -2,7 +2,7 @@
 using SC2APIProtocol;
 
 namespace Bot {
-    public interface Bot {
+    public interface IBot {
         IEnumerable<Action> OnFrame();
     }
 }
