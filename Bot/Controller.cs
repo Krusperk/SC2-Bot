@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Numerics;
 using System.Security.Cryptography;
 using System.Threading;
@@ -261,7 +262,8 @@ namespace Bot {
             var workers = GetUnits(Units.Workers);
             List<Unit> idleWorkers = new List<Unit>();
             foreach (var worker in workers) {
-                if (worker.order.AbilityId != 0) continue;
+                if (worker.order.AbilityId != 0) 
+                    continue;
                 idleWorkers.Add(worker);
             }
             
@@ -299,11 +301,12 @@ namespace Bot {
                     
                     var sqrDistance = 7 * 7;
                     foreach (var worker in workers) {
-                        if (worker.order.AbilityId != Abilities.GATHER_MINERALS) continue;
-                        if (Vector3.DistanceSquared(worker.position, transferFrom.position) > sqrDistance) continue;
-                                                
-                        var mf = GetFirstInRange(transferTo.position, mineralFields, 7);
-                        if (mf == null) continue;
+                        if (worker.order.AbilityId != Abilities.GATHER_MINERALS
+                            || Vector3.DistanceSquared(worker.position, transferFrom.position) > sqrDistance
+                            || !(GetFirstInRange(transferTo.position, mineralFields, 7) is Unit mf))
+                        {
+                            continue;
+                        }
                     
                         //only one at a time
                         Logger.Info("Distributing idle worker: {0}", worker.tag);
@@ -354,33 +357,62 @@ namespace Bot {
             const int radius = 12;
                               
             //trying to find a valid construction spot
-            var mineralFields = GetUnits(Units.MineralFields, onlyVisible:true, alliance:Alliance.Neutral); 
-            Vector3 constructionSpot;
-            while (true) {
-                constructionSpot = new Vector3(startingSpot.X + random.Next(-radius, radius + 1), startingSpot.Y + random.Next(-radius, radius + 1), 0);                
-                
-                //avoid building in the mineral line
-                if (IsInRange(constructionSpot, mineralFields, 5)) continue;
-                
-                //check if the building fits
-                if (!CanPlace(unitType, constructionSpot)) continue;
+            Vector3 constructionSpot = default;
+            ulong targetTag = default;
 
-                //ok, we found a spot
-                break;
+            // Find who will create construction (worker, building)
+            Unit creator = null;
+            if (new[] { Units.BARRACKS_TECHLAB, Units.BARRACKS_REACTOR }.Contains(unitType))
+                creator = GetUnits(Units.BARRACKS).First();
+            else if (unitType == Units.ORBITAL_COMMAND)
+                creator = GetUnits(Units.COMMAND_CENTER).First();
+            else if (unitType == Units.REFINERY)
+            {
+                var gasGeyser = GetUnits(Units.GasGeysers, onlyVisible: true, alliance: Alliance.Neutral)
+                                    .First();
+                targetTag = gasGeyser.tag;
+            }
+            else
+            {
+                var mineralFields = GetUnits(Units.MineralFields, onlyVisible:true, alliance:Alliance.Neutral); 
+                while (true)
+                {
+                    constructionSpot = new Vector3(startingSpot.X + random.Next(-radius, radius + 1), startingSpot.Y + random.Next(-radius, radius + 1), 0);
+
+                    //avoid building in the mineral line
+                    if (IsInRange(constructionSpot, mineralFields, 5)) continue;
+
+                    //check if the building fits
+                    if (!CanPlace(unitType, constructionSpot)) continue;
+
+                    //ok, we found a spot
+                    break;
+                } 
             }
 
-            var worker = GetAvailableWorker(constructionSpot);
-            if (worker == null) {
+            if (creator == null)
+                creator = GetAvailableWorker(constructionSpot); 
+
+            if (creator == null) {
                 Logger.Error("Unable to find worker to construct: {0}", GetUnitName(unitType));
                 return;
             }
-
+            
             var abilityID = Abilities.GetID(unitType);
             var constructAction = CreateRawUnitCommand(abilityID);
-            constructAction.ActionRaw.UnitCommand.UnitTags.Add(worker.tag);
-            constructAction.ActionRaw.UnitCommand.TargetWorldSpacePos = new Point2D();
-            constructAction.ActionRaw.UnitCommand.TargetWorldSpacePos.X = constructionSpot.X;
-            constructAction.ActionRaw.UnitCommand.TargetWorldSpacePos.Y = constructionSpot.Y;
+            constructAction.ActionRaw.UnitCommand.UnitTags.Add(creator.tag);
+            if (targetTag != default)
+            {
+                constructAction.ActionRaw.UnitCommand.TargetUnitTag = targetTag;
+            }
+            if (constructionSpot != default)
+            {
+                constructAction.ActionRaw.UnitCommand.TargetWorldSpacePos = new Point2D
+                {
+                    X = constructionSpot.X,
+                    Y = constructionSpot.Y
+                }; 
+            }
             AddAction(constructAction);
 
             Logger.Info("Constructing: {0} @ {1} / {2}", GetUnitName(unitType), constructionSpot.X, constructionSpot.Y);
