@@ -48,7 +48,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Abilities.cs" />
+    <Compile Include="Bots\BaseBot.cs" />
     <Compile Include="Controller.cs" />
+    <Compile Include="Bots\KrushBot.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Protocol\Common.cs" />
@@ -67,7 +69,10 @@
     <Compile Include="Wrapper\GameConnection.cs" />
     <Compile Include="Wrapper\ProtobufProxy.cs" />
     <Compile Include="Units.cs" />
-    <Compile Include="RaxBot.cs" />
+    <Compile Include="Bots\RaxBot.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="stableid.json" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
