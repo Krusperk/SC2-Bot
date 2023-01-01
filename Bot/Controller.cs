@@ -193,18 +193,21 @@ namespace Bot {
             //is it a structure?
             if (Units.Structures.Contains(unitType)) {
                 //we need worker for every structure
-                if (GetUnits(Units.Workers).Count == 0) return false;
+                if (GetUnits(Units.Workers).Count == 0) 
+                    return false;
 
                 //we need an RC for any structure
                 var resourceCenters = GetUnits(Units.ResourceCenters, onlyCompleted:true);
-                if (resourceCenters.Count == 0) return false;
+                if (resourceCenters.Count == 0) 
+                    return false;
                 
                 if ((unitType == Units.COMMAND_CENTER) || (unitType == Units.SUPPLY_DEPOT))
                     return CanAfford(unitType);
                 
                 //we need supply depots for the following structures
                 var depots = GetUnits(Units.SupplyDepots, onlyCompleted:true);
-                if (depots.Count == 0) return false;
+                if (depots.Count == 0) 
+                    return false;
                 
                 if (unitType == Units.BARRACKS)
                     return CanAfford(unitType);
@@ -220,7 +223,8 @@ namespace Bot {
                 //do we construct the units from barracks? 
                 if (Units.FromBarracks.Contains(unitType)) {
                     var barracks = GetUnits(Units.BARRACKS, onlyCompleted:true);
-                    if (barracks.Count == 0) return false;
+                    if (barracks.Count == 0) 
+                        return false;
                 }
                                 
             }
@@ -258,16 +262,19 @@ namespace Bot {
         }
 
 
-        public static void DistributeWorkers() {            
+        public static void DistributeWorkers() 
+        {            
             var workers = GetUnits(Units.Workers);
             List<Unit> idleWorkers = new List<Unit>();
-            foreach (var worker in workers) {
+            foreach (var worker in workers) 
+            {
                 if (worker.order.AbilityId != 0) 
                     continue;
                 idleWorkers.Add(worker);
             }
             
-            if (idleWorkers.Count > 0) {
+            if (idleWorkers.Count > 0) 
+            {
                 var resourceCenters = GetUnits(Units.ResourceCenters, onlyCompleted:true);
                 var mineralFields = GetUnits(Units.MineralFields, onlyVisible: true, alliance:Alliance.Neutral);
                 
@@ -284,7 +291,8 @@ namespace Bot {
                 //nothing to be done
                 return;
             }
-            else {
+            else 
+            {
                 //let's see if we can distribute between bases                
                 var resourceCenters = GetUnits(Units.ResourceCenters, onlyCompleted:true);
                 Unit transferFrom = null;
@@ -315,19 +323,26 @@ namespace Bot {
                     }
                 }
             }
-        }
 
-
-        public static Unit GetAvailableWorker(Vector3 targetPosition) {
-            var workers = GetUnits(Units.Workers);
-            foreach (var worker in workers) {
-                if (worker.order.AbilityId != Abilities.GATHER_MINERALS) continue;
-                                
-                return worker;
+            // Transfere mining workers to refinery
+            foreach(var refinery in GetUnits(Units.REFINERY))
+            {
+                var miningPotenc = refinery.idealWorkers - refinery.assignedWorkers;
+                if (miningPotenc > 0)
+                {
+                    foreach (var worker in GetAvailableWorkers(miningPotenc))
+                        worker.Smart(refinery);
+                }
             }
-
-            return null;
         }
+
+        public static IEnumerable<Unit> GetAvailableWorkers(int count = 1) =>
+            GetUnits(Units.Workers)
+                .Where(w => w.order.AbilityId == Abilities.GATHER_MINERALS)
+                .Take(count);
+        
+
+        public static Unit GetAvailableWorker() => GetAvailableWorkers(1).Single();
 
         public static bool IsInRange(Vector3 targetPosition, List<Unit> units, float maxDistance) {
             return (GetFirstInRange(targetPosition, units, maxDistance) != null);
@@ -363,9 +378,13 @@ namespace Bot {
             // Find who will create construction (worker, building)
             Unit creator = null;
             if (new[] { Units.BARRACKS_TECHLAB, Units.BARRACKS_REACTOR }.Contains(unitType))
+            {
                 creator = GetUnits(Units.BARRACKS).First();
+            }
             else if (unitType == Units.ORBITAL_COMMAND)
+            {
                 creator = GetUnits(Units.COMMAND_CENTER).First();
+            }
             else if (unitType == Units.REFINERY)
             {
                 var gasGeyser = GetUnits(Units.GasGeysers, onlyVisible: true, alliance: Alliance.Neutral)
@@ -375,23 +394,33 @@ namespace Bot {
             else
             {
                 var mineralFields = GetUnits(Units.MineralFields, onlyVisible:true, alliance:Alliance.Neutral); 
-                while (true)
+                // Try find appropriate place for 100 tries
+                for (int i = 0; i < 100; i++)
                 {
-                    constructionSpot = new Vector3(startingSpot.X + random.Next(-radius, radius + 1), startingSpot.Y + random.Next(-radius, radius + 1), 0);
+                    var constructionSpotAux = new Vector3(startingSpot.X + random.Next(-radius, radius + 1), startingSpot.Y + random.Next(-radius, radius + 1), 0);
 
                     //avoid building in the mineral line
-                    if (IsInRange(constructionSpot, mineralFields, 5)) continue;
+                    if (IsInRange(constructionSpotAux, mineralFields, 5))
+                        continue;
 
                     //check if the building fits
-                    if (!CanPlace(unitType, constructionSpot)) continue;
+                    if (!CanPlace(unitType, constructionSpotAux))
+                        continue;
+
+                    constructionSpot = constructionSpotAux;
 
                     //ok, we found a spot
                     break;
-                } 
+                }
+                if (constructionSpot == default)
+                {
+                    Logger.Info($"Cannot find place for {GetUnitName(unitType)}");
+                    return;
+                }
             }
 
             if (creator == null)
-                creator = GetAvailableWorker(constructionSpot); 
+                creator = GetAvailableWorker(); 
 
             if (creator == null) {
                 Logger.Error("Unable to find worker to construct: {0}", GetUnitName(unitType));
