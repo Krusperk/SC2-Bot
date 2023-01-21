@@ -211,10 +211,17 @@ namespace Bot {
                 
                 if (unitType == Units.BARRACKS)
                     return CanAfford(unitType);
+
+                // We need barracks for the following structures
+                if (GetUnits(Units.BARRACKS, onlyCompleted: true).Count == 0)
+                    return false;
+
+                if (unitType == Units.BARRACKS_TECHLAB)
+                    return GetUnits(Units.BARRACKS, onlyCompleted: true).Count > GetUnits(Units.BarracksAddOns, onlyCompleted: true).Count;
             }
-            
             //it's an actual unit
-            else {                
+            else
+            {                
                 //do we have enough supply?
                 var requiredSupply = Controller.gameData.Units[(int) unitType].FoodRequired;
                 if (requiredSupply > (maxSupply - currentSupply))
@@ -225,11 +232,21 @@ namespace Bot {
                     var barracks = GetUnits(Units.BARRACKS, onlyCompleted:true);
                     if (barracks.Count == 0) 
                         return false;
-                }
-                                
+                }               
             }
             
             return CanAfford(unitType);
+        }
+
+        public static bool CanExecuteAbilitie(uint abilitie)
+        {
+            if (abilitie == Abilities.RESEARCH_ORBITAL_COMMAND
+                && GetUnits(Units.COMMAND_CENTER, onlyCompleted: true).Any())
+            {
+                return CanAfford(abilitie);
+            }
+
+            return CanAfford(abilitie);
         }
 
         public static Action CreateRawUnitCommand(int ability) {

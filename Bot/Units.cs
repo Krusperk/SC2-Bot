@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Bot {
     internal static class Units {
@@ -703,6 +704,9 @@ namespace Bot {
         };
 
 
+        public static readonly IEnumerable<uint> UnitsAll = ArmyUnits.Union(Workers);
+
+
         public static readonly HashSet<uint> Mechanical = new HashSet<uint> {
             HELLBAT,
             BANSHEE,
@@ -786,7 +790,14 @@ namespace Bot {
             STARPORT_TECHLAB,
             STARPORT_REACTOR
         };
-        
+
+        public static readonly HashSet<uint> BarracksAddOns = new HashSet<uint>
+        {
+            BARRACKS_REACTOR,
+            BARRACKS_TECHLAB
+        };
+
+
         public static readonly HashSet<uint> SupplyDepots = new HashSet<uint> {
             SUPPLY_DEPOT,
             SUPPLY_DEPOT_LOWERED

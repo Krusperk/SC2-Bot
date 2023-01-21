@@ -3,13 +3,18 @@
 namespace Bot {
     internal static class Abilities {
         //you can get all these values from the stableid.json file (just search for it on your PC)
-        
+
+        public static int RESEARCH_ORBITAL_COMMAND = 1516;
         public static int RESEARCH_BANSHEE_CLOAK = 790;
         public static int RESEARCH_INFERNAL_PREIGNITER = 761;
         public static int RESEARCH_UPGRADE_MECH_AIR = 3699;     
         public static int RESEARCH_UPGRADE_MECH_ARMOR = 3700;   
-        public static int RESEARCH_UPGRADE_MECH_GROUND = 3701;  
-        
+        public static int RESEARCH_UPGRADE_MECH_GROUND = 3701;
+
+        public static int BUILD_NUKE = 710;
+        public static int NUKE_CALLDOWN = 1622;
+
+
         public static int CANCEL_CONSTRUCTION = 314;       
         public static int CANCEL = 3659;
         public static int CANCEL_LAST = 3671;
