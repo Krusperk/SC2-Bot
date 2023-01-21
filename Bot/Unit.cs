@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Google.Protobuf.Collections;
@@ -56,7 +57,7 @@ namespace Bot {
             if (!queue && orders.Count > 0)
                 return;            
 
-            var abilityID = Abilities.GetID(unitType);            
+            var abilityID = Abilities.GetID(unitType);
             var action = Controller.CreateRawUnitCommand(abilityID);
             action.ActionRaw.UnitCommand.UnitTags.Add(tag);
             Controller.AddAction(action);
@@ -66,7 +67,7 @@ namespace Bot {
         }
         
         private void FocusCamera() {
-            var action = new Action();
+            var action = new SC2APIProtocol.Action();
             action.ActionRaw = new ActionRaw();
             action.ActionRaw.CameraMove = new ActionRawCameraMove();
             action.ActionRaw.CameraMove.CenterWorldSpace = new Point();
@@ -92,8 +93,5 @@ namespace Bot {
             action.ActionRaw.UnitCommand.UnitTags.Add(tag);
             Controller.AddAction(action);
         }
-
-
-        
     }
 }

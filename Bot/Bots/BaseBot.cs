@@ -49,7 +49,7 @@ namespace Bot
 
             //attack when we have enough units
             var army = Controller.GetUnits(Units.ArmyUnits);
-            if (army.Count >= 5)
+            if (army.Count >= 20)
             {
                 if (Controller.enemyLocations.Count > 0)
                     Controller.Attack(army, Controller.enemyLocations[0]);
@@ -64,13 +64,9 @@ namespace Bot
                 && Controller.GetTotalCount(toProduce) < count)
             {
                 if (produceFrom == null)
-                {
                     Controller.Construct(toProduce);
-                }
                 else
-                {
                     produceFrom.Train(toProduce);
-                }
             }
         }
     }

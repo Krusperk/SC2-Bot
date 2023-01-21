@@ -12,17 +12,24 @@ namespace Bot
         {
             base.OnFrame();
 
-            ProductionDesire(Units.REFINERY, 1);
-            ProductionDesire(Units.BARRACKS, 1);
             ProductionDesire(Units.REFINERY, 2);
+            ProductionDesire(Units.BARRACKS, 1);
             ProductionDesire(Units.GHOST_ACADEMY, 1);
-            ProductionDesire(Units.BARRACKS_TECHLAB);
-            ProductionDesire(Units.ORBITAL_COMMAND);
+            ProductionDesire(Units.BARRACKS_TECHLAB, 1);
             ProductionDesire(Units.FACTORY, 1);
+
+
+            if (Controller.GetUnits(Units.BARRACKS, onlyCompleted: true).Any())
+            {
+                foreach (var commCenter in Controller.GetUnits(Units.COMMAND_CENTER))
+                {
+                    ProductionDesire(Units.ORBITAL_COMMAND, produceFrom: commCenter);
+                } 
+            }
 
             foreach (var resCenter in Controller.GetUnits(Units.ResourceCenters))
             {
-                if (Controller.GetTotalCount(Units.SCV) < resCenter.idealWorkers)
+                if (Controller.GetTotalCount(Units.SCV) < resCenter.idealWorkers + Controller.gassCapacity * 2) // ToDo: resCenter.idealWorkers + refineries.Count * Controller.gassCapacity
                     ProductionDesire(Units.SCV, produceFrom: resCenter);
             }
 
@@ -36,7 +43,7 @@ namespace Bot
 
             foreach (var ghostAca in Controller.GetUnits(Units.GHOST_ACADEMY, onlyCompleted: true))
             {
-                ProductionDesire(Units.NUKE, produceFrom: ghostAca); 
+                ProductionDesire(Units.NUKE, produceFrom: ghostAca);
             }
 
             //ProductionAim(Units.BARRACKS, 3);

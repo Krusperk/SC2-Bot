@@ -30,6 +30,7 @@ namespace Bot {
 
         public static readonly List<Vector3> enemyLocations = new List<Vector3>();
         public static readonly List<string> chatLog = new List<string>();
+        public static readonly uint gassCapacity = 3;
 
         public static void Pause() {
             Console.WriteLine("Press any key to continue...");
@@ -123,9 +124,8 @@ namespace Bot {
 
 
         public static int GetTotalCount(uint unitType) {
-            var pendingCount = GetPendingCount(unitType, inConstruction: false);
             var constructionCount = GetUnits(unitType).Count;
-            return pendingCount + constructionCount;
+            return constructionCount;
         }
 
         public static int GetPendingCount(uint unitType, bool inConstruction=true) {
@@ -185,9 +185,13 @@ namespace Bot {
 
         public static bool CanAfford(uint unitType) {
             var unitData = gameData.Units[(int) unitType];
-            return (minerals >= unitData.MineralCost) && (vespene >= unitData.VespeneCost);
-        }
 
+            // Orbital command upg is 400 cheeper than actual orbital command
+            uint discount = unitType == Units.ORBITAL_COMMAND ? 400U : 0U;
+
+            return (minerals >= unitData.MineralCost - discount) 
+                && (vespene >= unitData.VespeneCost);
+        }
 
         public static bool CanConstruct(uint unitType) {
             //is it a structure?
@@ -205,10 +209,12 @@ namespace Bot {
                     return CanAfford(unitType);
                 
                 //we need supply depots for the following structures
-                var depots = GetUnits(Units.SupplyDepots, onlyCompleted:true);
-                if (depots.Count == 0) 
+                if (!GetUnits(Units.SupplyDepots, onlyCompleted: true).Any()) 
                     return false;
-                
+
+                if (unitType == Units.REFINERY)
+                    return CanAfford(unitType);
+
                 if (unitType == Units.BARRACKS)
                     return CanAfford(unitType);
 
@@ -217,7 +223,12 @@ namespace Bot {
                     return false;
 
                 if (unitType == Units.BARRACKS_TECHLAB)
-                    return GetUnits(Units.BARRACKS, onlyCompleted: true).Count > GetUnits(Units.BarracksAddOns, onlyCompleted: true).Count;
+                    return GetUnits(Units.BARRACKS, onlyCompleted: true).Count > GetUnits(Units.BarracksAddOns, onlyCompleted: true).Count
+                            && CanAfford(unitType);
+
+                if (unitType == Units.ORBITAL_COMMAND)
+                    return CanAfford(unitType);
+
             }
             //it's an actual unit
             else
@@ -238,16 +249,6 @@ namespace Bot {
             return CanAfford(unitType);
         }
 
-        public static bool CanExecuteAbilitie(uint abilitie)
-        {
-            if (abilitie == Abilities.RESEARCH_ORBITAL_COMMAND
-                && GetUnits(Units.COMMAND_CENTER, onlyCompleted: true).Any())
-            {
-                return CanAfford(abilitie);
-            }
-
-            return CanAfford(abilitie);
-        }
 
         public static Action CreateRawUnitCommand(int ability) {
             var action = new Action();
@@ -344,7 +345,7 @@ namespace Bot {
             // Transfere mining workers to refinery
             foreach(var refinery in GetUnits(Units.REFINERY))
             {
-                var miningPotenc = refinery.idealWorkers - refinery.assignedWorkers;
+                var miningPotenc = refinery.idealWorkers - refinery.assignedWorkers - 1;
                 if (miningPotenc > 0)
                 {
                     foreach (var worker in GetAvailableWorkers(miningPotenc))
@@ -463,7 +464,5 @@ namespace Bot {
 
             Logger.Info("Constructing: {0} @ {1} / {2}", GetUnitName(unitType), constructionSpot.X, constructionSpot.Y);
         }
-
-
     }
 }
