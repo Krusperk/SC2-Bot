@@ -16,7 +16,7 @@ namespace Bot {
         private static readonly string mapName = "AbyssalReefLE.SC2Map";
 
         private static readonly Race opponentRace = Race.Random;
-        private static readonly Difficulty opponentDifficulty = Difficulty.Easy;
+        private static readonly Difficulty opponentDifficulty = Difficulty.VeryEasy;
 
         public static GameConnection gc;
 

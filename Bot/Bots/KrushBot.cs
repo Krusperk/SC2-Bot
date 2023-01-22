@@ -13,9 +13,9 @@ namespace Bot
             base.OnFrame();
 
             ProductionDesire(Units.REFINERY, 2);
-            ProductionDesire(Units.BARRACKS, 1);
-            ProductionDesire(Units.GHOST_ACADEMY, 1);
-            ProductionDesire(Units.BARRACKS_TECHLAB, 1);
+            ProductionDesire(Units.BARRACKS, 2);
+            ProductionDesire(Units.GHOST_ACADEMY, 2);
+            ProductionDesire(Units.BARRACKS_TECHLAB, 2);
             ProductionDesire(Units.FACTORY, 1);
 
 
