@@ -780,6 +780,10 @@ namespace Bot {
             LIBERATOR
         };
 
+        public static readonly HashSet<uint> FromGhostAcademy = new HashSet<uint> {
+            NUKE
+        };
+
         public static readonly HashSet<uint> AddOns = new HashSet<uint> {
             TECHLAB,
             REACTOR,

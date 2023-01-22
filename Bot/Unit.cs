@@ -55,9 +55,12 @@ namespace Bot {
         
         public void Train(uint unitType, bool queue=false) {            
             if (!queue && orders.Count > 0)
-                return;            
+                return;
 
-            var abilityID = Abilities.GetID(unitType);
+            int abilityID = unitType == Units.NUKE ?    // If it's specificaly nuke
+                            Abilities.BUILD_NUKE :
+                            Abilities.GetID(unitType);
+
             var action = Controller.CreateRawUnitCommand(abilityID);
             action.ActionRaw.UnitCommand.UnitTags.Add(tag);
             Controller.AddAction(action);

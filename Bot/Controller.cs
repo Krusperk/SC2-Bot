@@ -248,12 +248,25 @@ namespace Bot {
                 if (requiredSupply > (maxSupply - currentSupply))
                     return false;
 
-                //do we construct the units from barracks? 
+                //do we construct the units from Barracks? 
                 if (Units.FromBarracks.Contains(unitType)) {
-                    var barracks = GetUnits(Units.BARRACKS, onlyCompleted:true);
-                    if (barracks.Count == 0) 
+                    if (!GetUnits(Units.BARRACKS, onlyCompleted: true).Any()) 
                         return false;
-                }               
+                }
+
+                //do we construct the units from Ghost academy? 
+                if (Units.FromGhostAcademy.Contains(unitType))
+                {
+                    if (!GetUnits(Units.GHOST_ACADEMY, onlyCompleted: true).Any())
+                        return false;
+
+                    // Nuke requires also Factory
+                    if (unitType == Units.NUKE
+                        && !GetUnits(Units.FACTORY, onlyCompleted: true).Any())
+                    {
+                        return false;
+                    }       
+                }
             }
             
             return CanAfford(unitType);
