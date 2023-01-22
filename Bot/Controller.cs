@@ -222,12 +222,22 @@ namespace Bot {
                 if (GetUnits(Units.BARRACKS, onlyCompleted: true).Count == 0)
                     return false;
 
+                if (unitType == Units.GHOST_ACADEMY)
+                    return CanAfford(unitType);
+
                 if (unitType == Units.BARRACKS_TECHLAB)
                     return GetUnits(Units.BARRACKS, onlyCompleted: true).Count > GetUnits(Units.BarracksAddOns, onlyCompleted: true).Count
                             && CanAfford(unitType);
 
                 if (unitType == Units.ORBITAL_COMMAND)
                     return CanAfford(unitType);
+
+                if (unitType == Units.FACTORY)
+                    return CanAfford(unitType);
+
+                // We need factory for the following "structures"
+                if (GetUnits(Units.FACTORY, onlyCompleted: true).Count == 0)
+                    return false;
 
             }
             //it's an actual unit
