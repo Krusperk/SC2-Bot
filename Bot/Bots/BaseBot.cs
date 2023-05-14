@@ -57,17 +57,5 @@ namespace Bot
 
             return Controller.CloseFrame();
         }
-
-        protected virtual void ProductionDesire(uint toProduce, uint count = uint.MaxValue, Unit produceFrom = null)
-        {
-            if (Controller.CanConstruct(toProduce)
-                && Controller.GetTotalCount(toProduce) < count)
-            {
-                if (produceFrom == null)
-                    Controller.Construct(toProduce);
-                else
-                    produceFrom.Train(toProduce);
-            }
-        }
     }
 }

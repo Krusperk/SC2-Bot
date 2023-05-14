@@ -12,42 +12,52 @@ namespace Bot
         {
             base.OnFrame();
 
-            ProductionDesire(Units.REFINERY, 2);
-            ProductionDesire(Units.BARRACKS, 2);
-            ProductionDesire(Units.GHOST_ACADEMY, 2);
-            ProductionDesire(Units.BARRACKS_TECHLAB, 2);
-            ProductionDesire(Units.FACTORY, 1);
+            #region Unit actions
+
+            // Ghost attempt to nuke
+            Controller.GhostNukeAction();
+
+            #endregion
+
+            #region Production/Construction
+            Controller.ProductionDesire(Units.REFINERY, 2);
+            Controller.ProductionDesire(Units.BARRACKS, 1);
+            Controller.ProductionDesire(Units.GHOST_ACADEMY, 1);
+            Controller.ProductionDesire(Units.BARRACKS_TECHLAB, 1);
+            //Controller.ProductionDesire(Units.FACTORY, 1);
+            Controller.Research(Abilities.RESEARCH_GHOST_CLOAK);
 
 
             if (Controller.GetUnits(Units.BARRACKS, onlyCompleted: true).Any())
             {
                 foreach (var commCenter in Controller.GetUnits(Units.COMMAND_CENTER))
                 {
-                    ProductionDesire(Units.ORBITAL_COMMAND, produceFrom: commCenter);
+                    Controller.ProductionDesire(Units.ORBITAL_COMMAND, produceFrom: commCenter);
                 } 
             }
 
             foreach (var resCenter in Controller.GetUnits(Units.ResourceCenters))
             {
                 if (Controller.GetTotalCount(Units.SCV) < resCenter.idealWorkers + Controller.gassCapacity * 2) // ToDo: resCenter.idealWorkers + refineries.Count * Controller.gassCapacity
-                    ProductionDesire(Units.SCV, produceFrom: resCenter);
+                    Controller.ProductionDesire(Units.SCV, produceFrom: resCenter);
             }
 
             foreach (var barrack in Controller.GetUnits(Units.BARRACKS, onlyCompleted: true))
             {
-                ProductionDesire(Units.GHOST, produceFrom: barrack);
+                Controller.ProductionDesire(Units.GHOST, produceFrom: barrack);
 
                 if (Controller.GetTotalCount(Units.MARINE) < 5)
-                    ProductionDesire(Units.MARINE, produceFrom: barrack);
+                    Controller.ProductionDesire(Units.MARINE, produceFrom: barrack);
             }
 
             foreach (var ghostAca in Controller.GetUnits(Units.GHOST_ACADEMY, onlyCompleted: true))
             {
-                ProductionDesire(Units.NUKE, produceFrom: ghostAca);
+                Controller.ProductionDesire(Units.NUKE, produceFrom: ghostAca);
             }
 
             //ProductionAim(Units.BARRACKS, 3);
             //ProductionAim(Units.GHOST_ACADEMY, 3);
+            #endregion
 
             return Controller.CloseFrame();
         }

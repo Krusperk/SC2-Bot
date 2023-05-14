@@ -6,6 +6,7 @@ namespace Bot {
 
         public static int RESEARCH_ORBITAL_COMMAND = 1516;
         public static int RESEARCH_BANSHEE_CLOAK = 790;
+        public static int RESEARCH_GHOST_CLOAK = 820;
         public static int RESEARCH_INFERNAL_PREIGNITER = 761;
         public static int RESEARCH_UPGRADE_MECH_AIR = 3699;     
         public static int RESEARCH_UPGRADE_MECH_ARMOR = 3700;   

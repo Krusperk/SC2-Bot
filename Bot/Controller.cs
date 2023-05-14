@@ -273,11 +273,14 @@ namespace Bot {
         }
 
 
-        public static Action CreateRawUnitCommand(int ability) {
+        public static Action CreateRawUnitCommand(int ability = -1, ulong unitTag = 0) {
             var action = new Action();
             action.ActionRaw = new ActionRaw();
             action.ActionRaw.UnitCommand = new ActionRawUnitCommand();
-            action.ActionRaw.UnitCommand.AbilityId = ability;
+            if (ability != -1)
+                action.ActionRaw.UnitCommand.AbilityId = ability;
+            if (unitTag != 0)
+                action.ActionRaw.UnitCommand.UnitTags.Add(unitTag);
             return action;
         }
 
@@ -486,6 +489,69 @@ namespace Bot {
             AddAction(constructAction);
 
             Logger.Info("Constructing: {0} @ {1} / {2}", GetUnitName(unitType), constructionSpot.X, constructionSpot.Y);
+        }
+
+
+        public static void ProductionDesire(uint toProduce, uint count = uint.MaxValue, Unit produceFrom = null)
+        {
+            if (CanConstruct(toProduce)
+                && GetTotalCount(toProduce) < count)
+            {
+                if (produceFrom == null)
+                    Construct(toProduce);
+                else
+                    produceFrom.Train(toProduce);
+            }
+        }
+
+        public static void Research(int toResearch)
+        {
+            if (CanResearch(toResearch))
+            {
+                ulong unitTag = 0;
+
+                if (toResearch == Abilities.RESEARCH_GHOST_CLOAK)
+                    unitTag = GetUnits(Units.GHOST_ACADEMY, onlyCompleted: true).First().tag;
+                
+                var researchAction = CreateRawUnitCommand(toResearch, unitTag);
+
+                AddAction(researchAction);
+            }
+        }
+
+        private static bool CanResearch(int toResearch)
+        {
+            if (toResearch == Abilities.RESEARCH_GHOST_CLOAK
+                && GetUnits(Units.GHOST_ACADEMY, onlyCompleted: true).Any())
+            {
+                return CanAffortResearch(toResearch);
+            }
+
+            return false;
+        }
+
+        private static bool CanAffortResearch(int toResearch)
+        {
+            if (toResearch == Abilities.RESEARCH_GHOST_CLOAK)
+                return minerals > 150 && vespene > 150;
+
+            return false;
+        }
+
+
+        public static void GhostNukeAction()
+        {
+            if (GetUnits(Units.GHOST).FirstOrDefault() is Unit ghost)
+            {
+                var target = enemyLocations[0];
+
+                var action = CreateRawUnitCommand(Abilities.NUKE_CALLDOWN);
+                action.ActionRaw.UnitCommand.TargetWorldSpacePos = new Point2D();
+                action.ActionRaw.UnitCommand.TargetWorldSpacePos.X = target.X;
+                action.ActionRaw.UnitCommand.TargetWorldSpacePos.Y = target.Y;
+                action.ActionRaw.UnitCommand.UnitTags.Add(ghost.tag);
+                AddAction(action);
+            }
         }
     }
 }
