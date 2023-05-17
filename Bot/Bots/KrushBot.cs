@@ -15,16 +15,16 @@ namespace Bot
             #region Unit actions
 
             // Ghost attempt to nuke
-            Controller.GhostNukeAction();
+            Controller.NukeAttack();
 
             #endregion
 
             #region Production/Construction
             Controller.ProductionDesire(Units.REFINERY, 2);
             Controller.ProductionDesire(Units.BARRACKS, 1);
-            Controller.ProductionDesire(Units.GHOST_ACADEMY, 1);
+            Controller.ProductionDesire(Units.GHOST_ACADEMY, 3);
             Controller.ProductionDesire(Units.BARRACKS_TECHLAB, 1);
-            //Controller.ProductionDesire(Units.FACTORY, 1);
+            Controller.ProductionDesire(Units.FACTORY, 1);
             Controller.Research(Abilities.RESEARCH_GHOST_CLOAK);
 
 
@@ -44,10 +44,11 @@ namespace Bot
 
             foreach (var barrack in Controller.GetUnits(Units.BARRACKS, onlyCompleted: true))
             {
-                Controller.ProductionDesire(Units.GHOST, produceFrom: barrack);
+                if (Controller.GetTotalCount(Units.GHOST) < 5)
+                    Controller.ProductionDesire(Units.GHOST, produceFrom: barrack); 
 
-                if (Controller.GetTotalCount(Units.MARINE) < 5)
-                    Controller.ProductionDesire(Units.MARINE, produceFrom: barrack);
+                //if (Controller.GetTotalCount(Units.MARINE) < 5)
+                //    Controller.ProductionDesire(Units.MARINE, produceFrom: barrack);
             }
 
             foreach (var ghostAca in Controller.GetUnits(Units.GHOST_ACADEMY, onlyCompleted: true))

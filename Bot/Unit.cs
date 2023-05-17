@@ -23,6 +23,8 @@ namespace Bot {
         public bool isVisible;
         public int idealWorkers;
         public int assignedWorkers;
+        public float energy;
+        public CloakState cloakState;
 
         public Unit(SC2APIProtocol.Unit unit) {
             this.original = unit;
@@ -42,6 +44,9 @@ namespace Bot {
             this.isVisible = (unit.DisplayType == DisplayType.Visible);
 
             this.supply = (int) unitTypeData.FoodRequired;
+
+            this.cloakState = unit.Cloak;
+            this.energy = unit.Energy;
         }                        
         
         
