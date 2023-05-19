@@ -306,15 +306,9 @@ namespace Bot {
         public static void DistributeWorkers() 
         {            
             var workers = GetUnits(Units.Workers);
-            List<Unit> idleWorkers = new List<Unit>();
-            foreach (var worker in workers) 
-            {
-                if (worker.order.AbilityId != 0) 
-                    continue;
-                idleWorkers.Add(worker);
-            }
+            var idleWorkers = workers.Where(w => w.order.AbilityId == 0);
             
-            if (idleWorkers.Count > 0) 
+            if (idleWorkers.FirstOrDefault() is Unit idleWorker) 
             {
                 var resourceCenters = GetUnits(Units.ResourceCenters, onlyCompleted:true);
                 var mineralFields = GetUnits(Units.MineralFields, onlyVisible: true, alliance:Alliance.Neutral);
@@ -325,8 +319,8 @@ namespace Bot {
                     if (mf == null) continue;
                     
                     //only one at a time
-                    Logger.Info("Distributing idle worker: {0}", idleWorkers[0].tag);                    
-                    idleWorkers[0].Smart(mf);                                        
+                    Logger.Info("Distributing idle worker: {0}", idleWorker.tag);                    
+                    idleWorker.Smart(mf);                                        
                     return;
                 }
                 //nothing to be done
@@ -365,14 +359,24 @@ namespace Bot {
                 }
             }
 
-            // Transfere mining workers to refinery
-            foreach(var refinery in GetUnits(Units.REFINERY))
+            // Alter worker count assigned to refinery
+            foreach(var refinery in GetUnits(Units.REFINERY, Alliance.Self, true))
             {
-                var miningPotenc = refinery.idealWorkers - refinery.assignedWorkers - 1;
+                var miningPotenc = refinery.idealWorkers - refinery.assignedWorkers;
                 if (miningPotenc > 0)
                 {
                     foreach (var worker in GetAvailableWorkers(miningPotenc))
+                    {
+                        Logger.Info("Distributing worker to gas: {0}", worker.tag);
                         worker.Smart(refinery);
+                    }
+                }
+                else if (miningPotenc < 0)
+                {
+                    var worker = GetFirstInRange(refinery.position, GetUnits(Units.Workers), 7);
+                    var mineralField = GetFirstInRange(refinery.position, GetUnits(Units.MineralFields, onlyVisible: true, alliance: Alliance.Neutral), 7);
+                    Logger.Info("Distributing gas worker to mineral: {0}", worker.tag);
+                    worker.Smart(mineralField);
                 }
             }
         }
@@ -383,7 +387,7 @@ namespace Bot {
                 .Take(count);
         
 
-        public static Unit GetAvailableWorker() => GetAvailableWorkers(1).Single();
+        public static Unit GetAvailableWorker() => GetAvailableWorkers(1).SingleOrDefault();
 
         public static bool IsInRange(Vector3 targetPosition, List<Unit> units, float maxDistance) {
             return (GetFirstInRange(targetPosition, units, maxDistance) != null);
