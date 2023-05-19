@@ -46,7 +46,7 @@ namespace Bot {
         public static int UNLOAD_BUNKER = 408;
         public static int SALVAGE_BUNKER = 32;
         
-        //gathering/returning minerals
+        //gathering/returning resource
         public static int GATHER_RESOURCES = 295;
         public static int RETURN_RESOURCES = 296;
 
