@@ -38,7 +38,7 @@ namespace Bot
 
             foreach (var resCenter in Controller.GetUnits(Units.ResourceCenters))
             {
-                if (resCenter.assignedWorkers < resCenter.idealWorkers)
+                if (Controller.GetTotalCount(Units.SCV) < resCenter.idealWorkers + Controller.gassCapacity * 2) // ToDo: resCenter.idealWorkers + refineries.Count * Controller.gassCapacity
                     Controller.ProductionDesire(Units.SCV, produceFrom: resCenter);
             }
 
