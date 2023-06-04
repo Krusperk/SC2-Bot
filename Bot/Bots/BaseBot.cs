@@ -12,50 +12,50 @@ namespace Bot
         //you can increase the amount of frames that get processed for each step at once in Wrapper/GameConnection.cs: stepSize  
         public virtual IEnumerable<Action> OnFrame()
         {
-            Controller.OpenFrame();
+            MainController.OpenFrame();
 
-            if (Controller.frame == 0)
+            if (MainController.frame == 0)
             {
                 Logger.Info("Bot");
                 Logger.Info("--------------------------------------");
-                Logger.Info("Map: {0}", Controller.gameInfo.MapName);
+                Logger.Info("Map: {0}", MainController.gameInfo.MapName);
                 Logger.Info("--------------------------------------");
             }
 
-            if (Controller.frame == Controller.SecsToFrames(1))
-                Controller.Chat("gl hf");
+            if (MainController.frame == MainController.SecsToFrames(1))
+                MainController.Chat("gl hf");
 
-            var structures = Controller.GetUnits(Units.Structures);
+            var structures = UnitController.GetUnits(Units.Structures);
             if (structures.Count == 1)
             {
                 //last building                
                 if (structures[0].integrity < 0.4) //being attacked or burning down                 
-                    if (!Controller.chatLog.Contains("gg"))
-                        Controller.Chat("gg");
+                    if (!MainController.chatLog.Contains("gg"))
+                        MainController.Chat("gg");
             }
 
 
             //keep on buildings depots if supply is tight
-            if (Controller.maxSupply - Controller.currentSupply <= 5)
-                if (Controller.CanConstruct(Units.SUPPLY_DEPOT))
-                    if (Controller.GetPendingCount(Units.SUPPLY_DEPOT) == 0)
-                        Controller.Construct(Units.SUPPLY_DEPOT);
+            if (MainController.maxSupply - MainController.currentSupply <= 5)
+                if (ProductionController.CanConstruct(Units.SUPPLY_DEPOT))
+                    if (UnitController.GetPendingCount(Units.SUPPLY_DEPOT) == 0)
+                        ProductionController.Construct(Units.SUPPLY_DEPOT);
 
 
             //distribute workers optimally every 10 frames
-            if (Controller.frame % 10 == 0)
-                Controller.DistributeWorkers();
+            if (MainController.frame % 10 == 0)
+                UnitController.DistributeWorkers();
 
 
             //attack when we have enough units
-            var army = Controller.GetUnits(Units.ArmyUnits);
+            var army = UnitController.GetUnits(Units.ArmyUnits);
             if (army.Count >= 20)
             {
-                if (Controller.enemyLocations.Count > 0)
-                    Controller.Attack(army, Controller.enemyLocations[0]);
+                if (MainController.enemyLocations.Count > 0)
+                    CombatController.Attack(army, MainController.enemyLocations[0]);
             }
 
-            return Controller.CloseFrame();
+            return MainController.CloseFrame();
         }
     }
 }

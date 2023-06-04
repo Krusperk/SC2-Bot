@@ -28,7 +28,7 @@ namespace Bot {
 
         public Unit(SC2APIProtocol.Unit unit) {
             this.original = unit;
-            this.unitTypeData = Controller.gameData.Units[(int) unit.UnitType];
+            this.unitTypeData = MainController.gameData.Units[(int) unit.UnitType];
 
             this.name = unitTypeData.Name;
             this.tag = unit.Tag;
@@ -66,11 +66,11 @@ namespace Bot {
                             Abilities.BUILD_NUKE :
                             Abilities.GetID(unitType);
 
-            var action = Controller.CreateRawUnitCommand(abilityID);
+            var action = MainController.CreateRawUnitCommand(abilityID);
             action.ActionRaw.UnitCommand.UnitTags.Add(tag);
-            Controller.AddAction(action);
+            MainController.AddAction(action);
 
-            var targetName = Controller.GetUnitName(unitType);
+            var targetName = UnitController.GetUnitName(unitType);
             Logger.Info("Started training: {0}", targetName);
         }
         
@@ -82,24 +82,24 @@ namespace Bot {
             action.ActionRaw.CameraMove.CenterWorldSpace.X = position.X;
             action.ActionRaw.CameraMove.CenterWorldSpace.Y = position.Y;
             action.ActionRaw.CameraMove.CenterWorldSpace.Z = position.Z;            
-            Controller.AddAction(action);
+            MainController.AddAction(action);
         }
         
         
         public void Move(Vector3 target) {
-            var action = Controller.CreateRawUnitCommand(Abilities.MOVE);
+            var action = MainController.CreateRawUnitCommand(Abilities.MOVE);
             action.ActionRaw.UnitCommand.TargetWorldSpacePos = new Point2D();
             action.ActionRaw.UnitCommand.TargetWorldSpacePos.X = target.X;
             action.ActionRaw.UnitCommand.TargetWorldSpacePos.Y = target.Y;
             action.ActionRaw.UnitCommand.UnitTags.Add(tag);
-            Controller.AddAction(action);
+            MainController.AddAction(action);
         }
         
         public void Smart(Unit unit) {
-            var action = Controller.CreateRawUnitCommand(Abilities.SMART);
+            var action = MainController.CreateRawUnitCommand(Abilities.SMART);
             action.ActionRaw.UnitCommand.TargetUnitTag = unit.tag;
             action.ActionRaw.UnitCommand.UnitTags.Add(tag);
-            Controller.AddAction(action);
+            MainController.AddAction(action);
         }
     }
 }
